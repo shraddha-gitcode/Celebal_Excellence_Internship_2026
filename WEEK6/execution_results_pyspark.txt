@@ -1,0 +1,172 @@
+WARNING: Using incubator modules: jdk.incubator.vector
+Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
+26/07/26 12:08:31 WARN Utils: Your hostname, vm, resolves to a loopback address: 127.0.0.1; using 192.0.2.2 instead (on interface eth0)
+26/07/26 12:08:31 WARN Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Using Spark's default log4j profile: org/apache/spark/log4j2-defaults.properties
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+/usr/local/lib/python3.12/dist-packages/pyspark/testing/utils.py:127: FutureWarning: PySpark does not yet fully support pandas >= 3.0.0. Some features may not work correctly. It is recommended to use pandas < 3.0.0 for now.
+  require_minimum_pandas_version()
+26/07/26 12:08:32 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+================================================================================
+SPARK ARCHITECTURE INFO (Driver / Cluster Manager / Executors)
+================================================================================
+Master (cluster manager URL): local[*]
+Application ID (Driver-assigned): local-1785067714397
+Default parallelism (executor cores available): 1
+================================================================================
+STEP 1: READ CSV WITH EXPLICIT SCHEMA (avoid inferSchema on large files)
+================================================================================
+root
+ |-- emp_id: string (nullable = true)
+ |-- name: string (nullable = true)
+ |-- department: string (nullable = true)
+ |-- country: string (nullable = true)
+ |-- age: integer (nullable = true)
+ |-- salary: double (nullable = true)
+ |-- join_date: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- email: string (nullable = true)
+
+================================================================================
+STEP 2: LAZY EVALUATION DEMONSTRATION
+================================================================================
+Time to BUILD the transformation chain (no action yet): 0.1826s (near-instant because nothing has executed)
+Time to EXECUTE via .count() action: 0.8128s -> 1916 rows
+This gap illustrates lazy evaluation: transformations only describe *what* to do; Spark builds a DAG/lineage graph and only computes it when an action runs.
+
+Logical + physical plan (lineage) for the chain above:
+== Parsed Logical Plan ==
+'Project ['emp_id, 'department, 'salary, 'bonus]
++- Project [emp_id#0, name#1, department#2, country#3, age#4, salary#5, join_date#6, status#7, email#8, (salary#5 * 0.1) AS bonus#23]
+   +- Filter isnotnull(salary#5)
+      +- Relation [emp_id#0,name#1,department#2,country#3,age#4,salary#5,join_date#6,status#7,email#8] csv
+
+== Analyzed Logical Plan ==
+emp_id: string, department: string, salary: double, bonus: double
+Project [emp_id#0, department#2, salary#5, bonus#23]
++- Project [emp_id#0, name#1, department#2, country#3, age#4, salary#5, join_date#6, status#7, email#8, (salary#5 * 0.1) AS bonus#23]
+   +- Filter isnotnull(salary#5)
+      +- Relation [emp_id#0,name#1,department#2,country#3,age#4,salary#5,join_date#6,status#7,email#8] csv
+
+== Optimized Logical Plan ==
+Project [emp_id#0, department#2, salary#5, (salary#5 * 0.1) AS bonus#23]
++- Filter isnotnull(salary#5)
+   +- Relation [emp_id#0,name#1,department#2,country#3,age#4,salary#5,join_date#6,status#7,email#8] csv
+
+== Physical Plan ==
+*(1) Project [emp_id#0, department#2, salary#5, (salary#5 * 0.1) AS bonus#23]
++- *(1) Filter isnotnull(salary#5)
+   +- FileScan csv [emp_id#0,department#2,salary#5] Batched: false, DataFilters: [isnotnull(salary#5)], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/home/claude/spark_arch_demo/employees.csv], PartitionFilters: [], PushedFilters: [IsNotNull(salary)], ReadSchema: struct<emp_id:string,department:string,salary:double>
+
+================================================================================
+STEP 3: SCHEMA MODIFICATION - rename, cast, add column
+================================================================================
+root
+ |-- employee_id: string (nullable = true)
+ |-- name: string (nullable = true)
+ |-- department: string (nullable = true)
+ |-- country: string (nullable = true)
+ |-- age: integer (nullable = true)
+ |-- salary: double (nullable = true)
+ |-- join_date: date (nullable = true)
+ |-- status: string (nullable = true)
+ |-- email: string (nullable = true)
+ |-- salary_band: string (nullable = false)
+
++-----------+----------+---------+-----------+
+|employee_id| join_date|   salary|salary_band|
++-----------+----------+---------+-----------+
+|     E10000|2024-01-17|112702.89|       High|
+|     E10001|2018-11-21| 96555.28|        Mid|
+|     E10002|2019-07-05| 41754.49|        Low|
+|     E10003|2020-02-18|117824.64|       High|
+|     E10004|2022-10-15| 97000.88|        Mid|
++-----------+----------+---------+-----------+
+only showing top 5 rows
+================================================================================
+STEP 4: NULL HANDLING + EFFICIENT FILTERING
+================================================================================
+Rows before null handling: 2000 | after: 1926
+Filtered result count: 192
++-----------+-----------+-----------+-------+---------+-----------+
+|employee_id|       name| department|country|   salary|salary_band|
++-----------+-----------+-----------+-------+---------+-----------+
+|     E10015|Employee_15|Engineering|    USA| 87723.44|        Mid|
+|     E10017|Employee_17|      Sales|    USA|135348.23|       High|
+|     E10023|Employee_23|    Support|  India|127197.12|       High|
+|     E10035|Employee_35|         HR|Germany|139711.87|       High|
+|     E10061|Employee_61|  Marketing|Germany| 63382.46|        Mid|
++-----------+-----------+-----------+-------+---------+-----------+
+only showing top 5 rows
+================================================================================
+STEP 5: WIDE TRANSFORMATION / SHUFFLE - avg salary by department
+================================================================================
++-----------+---------+----------+
+| department|headcount|avg_salary|
++-----------+---------+----------+
+|    Finance|      304| 113253.34|
+|      Sales|      302| 108578.56|
+|  Marketing|      334| 108475.43|
+|    Support|      325| 108386.66|
+|Engineering|      309| 107912.73|
+|         HR|      352| 104437.15|
++-----------+---------+----------+
+
+groupBy triggers a shuffle (Exchange) -> confirmed via explain():
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- Sort [avg_salary#124 DESC NULLS LAST], true, 0
+   +- Exchange rangepartitioning(avg_salary#124 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=324]
+      +- HashAggregate(keys=[department#2], functions=[count(1), avg(salary#5)])
+         +- Exchange hashpartitioning(department#2, 200), ENSURE_REQUIREMENTS, [plan_id=321]
+            +- HashAggregate(keys=[department#2], functions=[partial_count(1), partial_avg(salary#5)])
+               +- Project [department#2, salary#5]
+                  +- Filter atleastnnonnulls(1, email#8)
+                     +- FileScan csv [department#2,salary#5,email#8] Batched: false, DataFilters: [atleastnnonnulls(1, email#8)], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/home/claude/spark_arch_demo/employees.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<department:string,salary:double,email:string>
+
+
+================================================================================
+STEP 6: WRITE TO PARQUET AND CSV, THEN COMPARE
+================================================================================
+CSV output size:     188K	employees_csv_out
+================================================================================
+STEP 7: PREDICATE PUSHDOWN - CSV vs PARQUET read+filter timing
+================================================================================
+CSV read+filter:     309 rows in 1.2664s
+Parquet read+filter: 309 rows in 1.1572s
+
+Parquet physical plan (look for PushedFilters in the scan node):
+== Physical Plan ==
+*(1) Project [employee_id#213, salary#218]
++- *(1) Filter (isnotnull(department#215) AND (department#215 = Engineering))
+   +- *(1) ColumnarToRow
+      +- FileScan parquet [employee_id#213,department#215,salary#218] Batched: true, DataFilters: [isnotnull(department#215), (department#215 = Engineering)], Format: Parquet, Location: InMemoryFileIndex(1 paths)[file:/home/claude/spark_arch_demo/employees_parquet], PartitionFilters: [], PushedFilters: [IsNotNull(department), EqualTo(department,Engineering)], ReadSchema: struct<employee_id:string,department:string,salary:double>
+
+
+
+CSV physical plan (CSV source shows NO effective PushedFilters -- full row scan):
+== Physical Plan ==
+*(1) Project [employee_id#195, salary#200]
++- *(1) Filter (isnotnull(department#197) AND (department#197 = Engineering))
+   +- FileScan csv [employee_id#195,department#197,salary#200] Batched: false, DataFilters: [isnotnull(department#197), (department#197 = Engineering)], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/home/claude/spark_arch_demo/employees_csv_out], PartitionFilters: [], PushedFilters: [IsNotNull(department), EqualTo(department,Engineering)], ReadSchema: struct<employee_id:string,department:string,salary:double>
+
+
+================================================================================
+STEP 8: FULL PIPELINE - read -> transform -> filter -> write (Parquet)
+================================================================================
+Final pipeline output row count: 398
++-----------+-----------+-----------+-------+---+---------+----------+------+
+|employee_id|       name| department|country|age|   salary| join_date|status|
++-----------+-----------+-----------+-------+---+---------+----------+------+
+|     E10001| Employee_1|Engineering|     UK| 36| 96555.28|2018-11-21|Active|
+|     E10015|Employee_15|Engineering|    USA| 55| 87723.44|2016-04-20|Active|
+|     E10017|Employee_17|      Sales|    USA| 37|135348.23|2018-09-12|Active|
+|     E10023|Employee_23|    Support|  India| 32|127197.12|2021-08-13|Active|
+|     E10035|Employee_35|         HR|Germany| 43|139711.87|2020-09-15|Active|
++-----------+-----------+-----------+-------+---+---------+----------+------+
+only showing top 5 rows
+Written to: final_pipeline_output/ (Parquet)
+================================================================================
+DONE
+================================================================================
