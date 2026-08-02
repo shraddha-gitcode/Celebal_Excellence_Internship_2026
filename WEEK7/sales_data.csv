@@ -1,0 +1,13 @@
+order_id,product,category,price,quantity,customer,order_date
+1001,Widget A,Hardware,12.5,4,John,2024-01-05
+1002,Widget B,Hardware,9.99,2,Mary,2024-01-06
+1003,Gadget X,Electronics,45.0,,Steve,2024-01-06
+1001,Widget A,Hardware,12.5,4,John,2024-01-05
+1005,Gadget Y,Electronics,,3,Anita,2024-01-07
+1006,Tool Z,Hardware,22.0,1,Brian,2024-01-08
+1007,Gadget X,Electronics,45.0,2,Cathy,2024-01-09
+1008,Widget C,Hardware,15.75,,Derek,2024-01-09
+1009,Gadget Y,Electronics,60.0,1,Elena,2024-01-10
+1006,Tool Z,Hardware,22.0,1,Brian,2024-01-08
+1011,Widget B,Hardware,9.99,5,Farah,2024-01-11
+1012,Gadget Z,Electronics,,2,George,2024-01-12
