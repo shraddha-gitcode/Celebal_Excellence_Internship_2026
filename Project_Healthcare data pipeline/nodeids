@@ -1,0 +1,11 @@
+[
+  "tests/test_bronze.py::test_bronze_ingestion",
+  "tests/test_gold.py::test_gold_aggregations",
+  "tests/test_quality_and_logging.py::test_data_quality_report_export",
+  "tests/test_quality_and_logging.py::test_pipeline_logging",
+  "tests/test_silver.py::test_clean_silver_data",
+  "tests/test_silver.py::test_incremental_batch_processing",
+  "tests/test_silver.py::test_scd2_merge_changed_record",
+  "tests/test_silver.py::test_scd2_merge_new_record",
+  "tests/test_silver.py::test_scd2_merge_unchanged_record"
+]
