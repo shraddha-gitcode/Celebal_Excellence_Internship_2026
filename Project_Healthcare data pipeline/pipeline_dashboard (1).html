@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Healthcare Pipeline — Bronze / Silver / Gold</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#0E2E2C; --navy-deep:#08201F;
+    --mint:#F2F7F4; --mint-line:#D9E6DF;
+    --panel:#FFFFFF;
+    --bronze:#B08752; --bronze-bg:#F7EFE4;
+    --silver:#7C8A92; --silver-bg:#EEF1F2;
+    --gold:#D98E3E; --gold-bg:#FBF0DF;
+    --coral:#C4655B; --teal:#3E8E7E; --teal-soft:#8FBFAF;
+    --ink:#0E2E2C; --ink-soft:#5B7570;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --sans:'Space Grotesk','Inter',system-ui,sans-serif;
+    --body:'IBM Plex Sans',system-ui,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--mint);color:var(--ink);font-family:var(--body);padding:28px 32px 60px;}
+  .wrap{max-width:1240px;margin:0 auto;}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;
+    border-bottom:2px solid var(--navy);padding-bottom:18px;margin-bottom:0;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin:0 0 6px;}
+  h1{font-family:var(--sans);font-weight:700;font-size:28px;margin:0;letter-spacing:-0.01em;}
+  .flow{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;}
+  .flow .stage{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;border:1px solid var(--mint-line);background:var(--panel);}
+  .flow .dot{width:8px;height:8px;border-radius:50%;}
+  .flow .arrow{color:var(--ink-soft);}
+  .flow .b .dot{background:var(--bronze);} .flow .s .dot{background:var(--silver);} .flow .g .dot{background:var(--gold);}
+
+  .tabs{display:flex;gap:6px;margin:20px 0 22px;border-bottom:1px solid var(--mint-line);}
+  .tab{
+    font-family:var(--sans);font-weight:700;font-size:13.5px;
+    padding:10px 20px;cursor:pointer;border:none;background:none;
+    color:var(--ink-soft);border-bottom:3px solid transparent;
+    display:flex;align-items:center;gap:8px;
+  }
+  .tab .swatch{width:9px;height:9px;border-radius:50%;}
+  .tab.active{color:var(--navy-deep);border-bottom-color:var(--navy-deep);}
+  .tab[data-tab="bronze"] .swatch{background:var(--bronze);}
+  .tab[data-tab="silver"] .swatch{background:var(--silver);}
+  .tab[data-tab="gold"] .swatch{background:var(--gold);}
+
+  .layer-banner{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 20px;border-radius:10px;margin-bottom:18px;
+    font-family:var(--body);
+  }
+  .layer-banner h2{font-family:var(--sans);font-size:16px;margin:0 0 2px;}
+  .layer-banner p{margin:0;font-size:12px;color:var(--ink-soft);}
+  #view-bronze .layer-banner{background:var(--bronze-bg);}
+  #view-silver .layer-banner{background:var(--silver-bg);}
+  #view-gold .layer-banner{background:var(--gold-bg);}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{background:var(--panel);border:1px solid var(--mint-line);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;top:0;left:0;bottom:0;width:3px;}
+  #view-bronze .kpi::before{background:var(--bronze);}
+  #view-silver .kpi::before{background:var(--silver);}
+  #view-gold .kpi::before{background:var(--gold);}
+  .kpi-label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:6px;}
+  .kpi-value{font-family:var(--sans);font-weight:700;font-size:24px;color:var(--navy-deep);}
+
+  .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .panel{background:var(--panel);border:1px solid var(--mint-line);border-radius:10px;padding:18px 20px 12px;}
+  .panel h3{font-family:var(--sans);font-size:14px;font-weight:700;margin:0 0 2px;color:var(--navy-deep);}
+  .panel .sub{font-size:11.5px;color:var(--ink-soft);margin:0 0 12px;}
+  canvas{max-height:270px;}
+
+  table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  th{text-align:left;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);border-bottom:1px solid var(--mint-line);padding:6px 6px;white-space:nowrap;}
+  td{padding:6px 6px;border-bottom:1px solid #EEF3F0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
+  tr:last-child td{border-bottom:none;}
+  .rank{font-family:var(--mono);color:var(--teal);font-weight:600;}
+  .num{font-family:var(--mono);text-align:right;}
+  .tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:10px;display:inline-block;}
+  .tag.expired{background:#FBEAE8;color:var(--coral);}
+  .tag.new{background:#E7F3EE;color:var(--teal);}
+  .scroll-table{max-height:320px;overflow:auto;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  footer{margin-top:22px;font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Medallion Architecture</p>
+      <h1>Healthcare Pipeline Dashboard</h1>
+    </div>
+    <div class="flow">
+      <span class="stage b"><span class="dot"></span>Bronze 55,500</span>
+      <span class="arrow">→</span>
+      <span class="stage s"><span class="dot"></span>Silver 50,299 versions</span>
+      <span class="arrow">→</span>
+      <span class="stage g"><span class="dot"></span>Gold 8 tables</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="bronze"><span class="swatch"></span>Bronze — Raw</button>
+    <button class="tab" data-tab="silver"><span class="swatch"></span>Silver — Cleaned + SCD2</button>
+    <button class="tab" data-tab="gold"><span class="swatch"></span>Gold — Insights</button>
+  </div>
+
+  <!-- ============ BRONZE VIEW ============ -->
+  <div class="view active" id="view-bronze">
+    <div class="layer-banner">
+      <div><h2>Bronze Layer — Raw Ingestion</h2><p>Data preserved exactly as received, no cleaning or transformation.</p></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Rows Ingested</div><div class="kpi-value" id="b-rows">—</div></div>
+      <div class="kpi"><div class="kpi-label">Source Columns</div><div class="kpi-value" id="b-cols">—</div></div>
+      <div class="kpi"><div class="kpi-label">Source File</div><div class="kpi-value" id="b-file" style="font-size:14px;">—</div></div>
+      <div class="kpi"><div class="kpi-label">Last Ingested</div><div class="kpi-value" id="b-ts" style="font-size:13px;">—</div></div>
+    </div>
+    <div class="panel">
+      <h3>Raw Sample (as landed, before any cleaning)</h3>
+      <p class="sub">First 8 rows — untouched casing, formats, and values</p>
+      <div class="scroll-table"><table id="b-sample"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ============ SILVER VIEW ============ -->
+  <div class="view" id="view-silver">
+    <div class="layer-banner">
+      <div><h2>Silver Layer — Cleaning &amp; SCD Type 2</h2><p>Deduplicated, standardized, with full change history tracked via MERGE.</p></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Current Active Records</div><div class="kpi-value" id="s-current">—</div></div>
+      <div class="kpi"><div class="kpi-label">Historical Versions</div><div class="kpi-value" id="s-historical">—</div></div>
+      <div class="kpi"><div class="kpi-label">Duplicates Removed</div><div class="kpi-value" id="s-dupes">—</div></div>
+      <div class="kpi"><div class="kpi-label">Negative Billing Flagged</div><div class="kpi-value" id="s-negbill">—</div></div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Encounters Changed by MERGE (Day 2 load)</h3>
+        <p class="sub">Old version expired (<span class="tag expired">is_current=false</span>) when tracked fields changed</p>
+        <div class="scroll-table"><table id="s-changed"><thead><tr><th>Name</th><th>Hospital</th><th class="num">Billing</th><th>Effective End</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="panel">
+        <h3>New Current Versions Inserted</h3>
+        <p class="sub">Replacement rows (<span class="tag new">is_current=true</span>) with updated values</p>
+        <div class="scroll-table"><table id="s-new"><thead><tr><th>Name</th><th>Hospital</th><th class="num">Billing</th><th>Effective Start</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Current vs. Historical Record Split</h3>
+      <p class="sub">Every row in Silver, by SCD2 status</p>
+      <canvas id="s-donut" style="max-width:320px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ============ GOLD VIEW ============ -->
+  <div class="view" id="view-gold">
+    <div class="layer-banner">
+      <div><h2>Gold Layer — Business Insights</h2><p>Ready-to-use aggregations, built from current (is_current=true) Silver records.</p></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Active Patients</div><div class="kpi-value" id="g-patients">—</div></div>
+      <div class="kpi"><div class="kpi-label">Hospitals</div><div class="kpi-value" id="g-hospitals">—</div></div>
+      <div class="kpi"><div class="kpi-label">Total Billing</div><div class="kpi-value" id="g-billing">—</div></div>
+      <div class="kpi"><div class="kpi-label">Avg. Billing / Patient</div><div class="kpi-value" id="g-avg">—</div></div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Monthly Admission Trend</h3>
+        <p class="sub">Admissions per month, May 2019 – May 2024</p>
+        <canvas id="g-trend"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Top 10 Hospitals by Revenue</h3>
+        <p class="sub">From gold.hospital_ranking</p>
+        <table>
+          <thead><tr><th>#</th><th>Hospital</th><th class="num">Patients</th><th class="num">Total Billing</th></tr></thead>
+          <tbody id="g-hospitaltable"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="panel"><h3>Contribution by Condition</h3><p class="sub">Share of active patients</p><canvas id="g-condition"></canvas></div>
+      <div class="panel"><h3>Billing by Admission Type</h3><p class="sub">Elective / Emergency / Urgent</p><canvas id="g-admission"></canvas></div>
+      <div class="panel"><h3>Patients by Age Group</h3><p class="sub">Demographic distribution</p><canvas id="g-age"></canvas></div>
+    </div>
+    <div class="grid">
+      <div class="panel"><h3>Test Results by Condition</h3><p class="sub">Feeds MLOps risk model</p><canvas id="g-tests"></canvas></div>
+      <div class="panel"><h3>Billing by Insurance Provider</h3><p class="sub">Total billing volume</p><canvas id="g-insurance"></canvas></div>
+    </div>
+  </div>
+
+  <footer>Bronze → Silver → Gold · Medallion Architecture · Generated from patients_records.csv</footer>
+</div>
+
+<script id="all-data" type="application/json">{"bronze": {"total_rows": 55500, "total_columns": 15, "ingestion_timestamp": "2026-08-08T04:16:09.064141+00:00", "source_file": "source_data.csv", "sample_rows": [{"Name": "Bobby JacksOn", "Age": "30", "Gender": "Male", "Blood Type": "B-", "Medical Condition": "Cancer", "Date of Admission": "2024-01-31", "Doctor": "Matthew Smith", "Hospital": "Sons and Miller", "Insurance Provider": "Blue Cross", "Billing Amount": "18856.281305978155", "Room Number": "328", "Admission Type": "Urgent", "Discharge Date": "2024-02-02", "Medication": "Paracetamol", "Test Results": "Normal"}, {"Name": "LesLie TErRy", "Age": "62", "Gender": "Male", "Blood Type": "A+", "Medical Condition": "Obesity", "Date of Admission": "2019-08-20", "Doctor": "Samantha Davies", "Hospital": "Kim Inc", "Insurance Provider": "Medicare", "Billing Amount": "33643.327286577885", "Room Number": "265", "Admission Type": "Emergency", "Discharge Date": "2019-08-26", "Medication": "Ibuprofen", "Test Results": "Inconclusive"}, {"Name": "DaNnY sMitH", "Age": "76", "Gender": "Female", "Blood Type": "A-", "Medical Condition": "Obesity", "Date of Admission": "2022-09-22", "Doctor": "Tiffany Mitchell", "Hospital": "Cook PLC", "Insurance Provider": "Aetna", "Billing Amount": "27955.096078842456", "Room Number": "205", "Admission Type": "Emergency", "Discharge Date": "2022-10-07", "Medication": "Aspirin", "Test Results": "Normal"}, {"Name": "andrEw waTtS", "Age": "28", "Gender": "Female", "Blood Type": "O+", "Medical Condition": "Diabetes", "Date of Admission": "2020-11-18", "Doctor": "Kevin Wells", "Hospital": "Hernandez Rogers and Vang,", "Insurance Provider": "Medicare", "Billing Amount": "37909.78240987528", "Room Number": "450", "Admission Type": "Elective", "Discharge Date": "2020-12-18", "Medication": "Ibuprofen", "Test Results": "Abnormal"}, {"Name": "adrIENNE bEll", "Age": "43", "Gender": "Female", "Blood Type": "AB+", "Medical Condition": "Cancer", "Date of Admission": "2022-09-19", "Doctor": "Kathleen Hanna", "Hospital": "White-White", "Insurance Provider": "Aetna", "Billing Amount": "14238.317813937623", "Room Number": "458", "Admission Type": "Urgent", "Discharge Date": "2022-10-09", "Medication": "Penicillin", "Test Results": "Abnormal"}, {"Name": "EMILY JOHNSOn", "Age": "36", "Gender": "Male", "Blood Type": "A+", "Medical Condition": "Asthma", "Date of Admission": "2023-12-20", "Doctor": "Taylor Newton", "Hospital": "Nunez-Humphrey", "Insurance Provider": "UnitedHealthcare", "Billing Amount": "48145.11095104189", "Room Number": "389", "Admission Type": "Urgent", "Discharge Date": "2023-12-24", "Medication": "Ibuprofen", "Test Results": "Normal"}, {"Name": "edwArD EDWaRDs", "Age": "21", "Gender": "Female", "Blood Type": "AB-", "Medical Condition": "Diabetes", "Date of Admission": "2020-11-03", "Doctor": "Kelly Olson", "Hospital": "Group Middleton", "Insurance Provider": "Medicare", "Billing Amount": "19580.87234486093", "Room Number": "389", "Admission Type": "Emergency", "Discharge Date": "2020-11-15", "Medication": "Paracetamol", "Test Results": "Inconclusive"}, {"Name": "CHrisTInA MARtinez", "Age": "20", "Gender": "Female", "Blood Type": "A+", "Medical Condition": "Cancer", "Date of Admission": "2021-12-28", "Doctor": "Suzanne Thomas", "Hospital": "Powell Robinson and Valdez,", "Insurance Provider": "Cigna", "Billing Amount": "45820.46272159459", "Room Number": "277", "Admission Type": "Emergency", "Discharge Date": "2022-01-07", "Medication": "Paracetamol", "Test Results": "Inconclusive"}]}, "silver": {"total_versions": 50299, "current_rows": 50049, "historical_rows": 250, "negative_billing_flagged": 96, "duplicates_removed": 534, "changed_encounters_sample": [{"Name": "Nicole Gonzalez", "Hospital": "And Thompson Burke, Harrington", "Date of Admission": "2020-05-10", "Billing Amount": 3516.85, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Denise Wall", "Hospital": "Sosa-Jackson", "Date of Admission": "2023-02-05", "Billing Amount": 22775.47, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Kyle Anderson", "Hospital": "Roberts-Brock", "Date of Admission": "2022-08-12", "Billing Amount": 1933.24, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Marcus Gillespie", "Hospital": "Jacobs-Thompson", "Date of Admission": "2022-10-26", "Billing Amount": 36836.35, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Ashley Kim", "Hospital": "And Ochoa Sons", "Date of Admission": "2021-08-23", "Billing Amount": 14415.58, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Amber Lawson", "Hospital": "Cortez-Cannon", "Date of Admission": "2019-06-05", "Billing Amount": 25098.25, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Joseph Brooks", "Hospital": "Plc Williams", "Date of Admission": "2021-04-16", "Billing Amount": 6006.06, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}, {"Name": "Denise Mcguire", "Hospital": "Monroe-Morris", "Date of Admission": "2023-02-14", "Billing Amount": 37657.55, "effective_start_date": "2024-06-01", "effective_end_date": "2024-06-02"}], "new_current_versions_sample": [{"Name": "Charles Watkins", "Hospital": "Ferguson Ltd", "Date of Admission": "2020-09-13", "Billing Amount": 40714.81, "effective_start_date": "2024-06-02"}, {"Name": "Elaine Jordan", "Hospital": "Terry Llc", "Date of Admission": "2019-05-21", "Billing Amount": 46214.08, "effective_start_date": "2024-06-02"}, {"Name": "Carol Johnson", "Hospital": "Klein Group", "Date of Admission": "2022-02-04", "Billing Amount": 48774.9, "effective_start_date": "2024-06-02"}, {"Name": "Eric Burns", "Hospital": "Caldwell-Sanchez", "Date of Admission": "2019-06-07", "Billing Amount": 23613.74, "effective_start_date": "2024-06-02"}, {"Name": "Justin Greene", "Hospital": "Morgan And Wilson Stewart,", "Date of Admission": "2019-07-26", "Billing Amount": 28870.68, "effective_start_date": "2024-06-02"}, {"Name": "Christina Reynolds", "Hospital": "Love-Rich", "Date of Admission": "2020-06-20", "Billing Amount": 9783.61, "effective_start_date": "2024-06-02"}, {"Name": "Ms. Natalie Walker", "Hospital": "Krause-Rodriguez", "Date of Admission": "2019-07-11", "Billing Amount": 10130.81, "effective_start_date": "2024-06-02"}, {"Name": "Candace White", "Hospital": "Bradley And Trevino, Brewer", "Date of Admission": "2019-10-31", "Billing Amount": 16499.68, "effective_start_date": "2024-06-02"}]}, "gold": {"hospital_ranking_top15": [{"rank": 1, "Hospital": "Johnson Plc", "patient_count": 35, "total_billing": 1040431.6, "avg_billing": 29726.62}, {"rank": 2, "Hospital": "Llc Smith", "patient_count": 40, "total_billing": 948561.1, "avg_billing": 23714.03}, {"rank": 3, "Hospital": "Ltd Smith", "patient_count": 35, "total_billing": 915166.77, "avg_billing": 26147.62}, {"rank": 4, "Hospital": "Smith Plc", "patient_count": 33, "total_billing": 901359.29, "avg_billing": 27313.92}, {"rank": 5, "Hospital": "Smith Ltd", "patient_count": 35, "total_billing": 897694.86, "avg_billing": 25648.42}, {"rank": 6, "Hospital": "Group Smith", "patient_count": 30, "total_billing": 847450.76, "avg_billing": 28248.36}, {"rank": 7, "Hospital": "Johnson Inc", "patient_count": 29, "total_billing": 808238.6, "avg_billing": 27870.3}, {"rank": 8, "Hospital": "Llc Johnson", "patient_count": 29, "total_billing": 806971.31, "avg_billing": 27826.6}, {"rank": 9, "Hospital": "Inc Brown", "patient_count": 25, "total_billing": 801547.73, "avg_billing": 32061.91}, {"rank": 10, "Hospital": "Smith Group", "patient_count": 33, "total_billing": 785652.48, "avg_billing": 23807.65}, {"rank": 11, "Hospital": "Inc Jones", "patient_count": 23, "total_billing": 719331.31, "avg_billing": 31275.27}, {"rank": 12, "Hospital": "Williams Llc", "patient_count": 25, "total_billing": 710196.17, "avg_billing": 28407.85}, {"rank": 13, "Hospital": "Brown Inc", "patient_count": 26, "total_billing": 705969.16, "avg_billing": 27152.66}, {"rank": 14, "Hospital": "Inc Smith", "patient_count": 25, "total_billing": 695782.69, "avg_billing": 27831.31}, {"rank": 15, "Hospital": "Plc Williams", "patient_count": 27, "total_billing": 686686.63, "avg_billing": 25432.84}], "condition": [{"Medical Condition": "Arthritis", "patient_count": 8450, "avg_billing": 25496.39, "total_billing": 215444464.42, "pct_of_patients": 16.88}, {"Medical Condition": "Diabetes", "patient_count": 8397, "avg_billing": 25654.32, "total_billing": 215419354.73, "pct_of_patients": 16.78}, {"Medical Condition": "Hypertension", "patient_count": 8325, "avg_billing": 25493.01, "total_billing": 212229287.16, "pct_of_patients": 16.63}, {"Medical Condition": "Cancer", "patient_count": 8300, "avg_billing": 25239.28, "total_billing": 209486063.53, "pct_of_patients": 16.58}, {"Medical Condition": "Obesity", "patient_count": 8298, "avg_billing": 25786.86, "total_billing": 213979342.44, "pct_of_patients": 16.58}, {"Medical Condition": "Asthma", "patient_count": 8279, "avg_billing": 25686.37, "total_billing": 212657450.35, "pct_of_patients": 16.54}], "admission_type": [{"Admission Type": "Elective", "patient_count": 16842, "avg_billing": 25623.29, "total_billing": 431547463.28}, {"Admission Type": "Emergency", "patient_count": 16403, "avg_billing": 25526.71, "total_billing": 418714699.41}, {"Admission Type": "Urgent", "patient_count": 16804, "avg_billing": 25526.89, "total_billing": 428953799.94}], "insurance": [{"Insurance Provider": "Medicare", "patient_count": 10069, "avg_billing": 25628.41, "total_billing": 258052418.64}, {"Insurance Provider": "Cigna", "patient_count": 10099, "avg_billing": 25533.51, "total_billing": 257862936.61}, {"Insurance Provider": "Blue Cross", "patient_count": 10010, "avg_billing": 25652.94, "total_billing": 256785964.44}, {"Insurance Provider": "Unitedhealthcare", "patient_count": 10011, "avg_billing": 25417.66, "total_billing": 254456207.42}, {"Insurance Provider": "Aetna", "patient_count": 9860, "avg_billing": 25563.74, "total_billing": 252058435.52}], "monthly_trend": [{"admission_month": "2019-05", "admissions": 615}, {"admission_month": "2019-06", "admissions": 826}, {"admission_month": "2019-07", "admissions": 850}, {"admission_month": "2019-08", "admissions": 900}, {"admission_month": "2019-09", "admissions": 848}, {"admission_month": "2019-10", "admissions": 906}, {"admission_month": "2019-11", "admissions": 862}, {"admission_month": "2019-12", "admissions": 835}, {"admission_month": "2020-01", "admissions": 852}, {"admission_month": "2020-02", "admissions": 799}, {"admission_month": "2020-03", "admissions": 839}, {"admission_month": "2020-04", "admissions": 836}, {"admission_month": "2020-05", "admissions": 878}, {"admission_month": "2020-06", "admissions": 842}, {"admission_month": "2020-07", "admissions": 903}, {"admission_month": "2020-08", "admissions": 912}, {"admission_month": "2020-09", "admissions": 814}, {"admission_month": "2020-10", "admissions": 864}, {"admission_month": "2020-11", "admissions": 812}, {"admission_month": "2020-12", "admissions": 811}, {"admission_month": "2021-01", "admissions": 852}, {"admission_month": "2021-02", "admissions": 745}, {"admission_month": "2021-03", "admissions": 870}, {"admission_month": "2021-04", "admissions": 799}, {"admission_month": "2021-05", "admissions": 810}, {"admission_month": "2021-06", "admissions": 825}, {"admission_month": "2021-07", "admissions": 885}, {"admission_month": "2021-08", "admissions": 806}, {"admission_month": "2021-09", "admissions": 800}, {"admission_month": "2021-10", "admissions": 811}, {"admission_month": "2021-11", "admissions": 825}, {"admission_month": "2021-12", "admissions": 863}, {"admission_month": "2022-01", "admissions": 881}, {"admission_month": "2022-02", "admissions": 695}, {"admission_month": "2022-03", "admissions": 852}, {"admission_month": "2022-04", "admissions": 784}, {"admission_month": "2022-05", "admissions": 813}, {"admission_month": "2022-06", "admissions": 879}, {"admission_month": "2022-07", "admissions": 842}, {"admission_month": "2022-08", "admissions": 867}, {"admission_month": "2022-09", "admissions": 832}, {"admission_month": "2022-10", "admissions": 821}, {"admission_month": "2022-11", "admissions": 803}, {"admission_month": "2022-12", "admissions": 879}, {"admission_month": "2023-01", "admissions": 835}, {"admission_month": "2023-02", "admissions": 795}, {"admission_month": "2023-03", "admissions": 829}, {"admission_month": "2023-04", "admissions": 808}, {"admission_month": "2023-05", "admissions": 841}, {"admission_month": "2023-06", "admissions": 862}, {"admission_month": "2023-07", "admissions": 822}, {"admission_month": "2023-08", "admissions": 873}, {"admission_month": "2023-09", "admissions": 832}, {"admission_month": "2023-10", "admissions": 800}, {"admission_month": "2023-11", "admissions": 809}, {"admission_month": "2023-12", "admissions": 836}, {"admission_month": "2024-01", "admissions": 825}, {"admission_month": "2024-02", "admissions": 792}, {"admission_month": "2024-03", "admissions": 811}, {"admission_month": "2024-04", "admissions": 845}, {"admission_month": "2024-05", "admissions": 191}], "test_outcomes": [{"Medical Condition": "Arthritis", "Test Results": "Abnormal", "count": 2907}, {"Medical Condition": "Arthritis", "Test Results": "Inconclusive", "count": 2800}, {"Medical Condition": "Arthritis", "Test Results": "Normal", "count": 2743}, {"Medical Condition": "Asthma", "Test Results": "Abnormal", "count": 2701}, {"Medical Condition": "Asthma", "Test Results": "Inconclusive", "count": 2728}, {"Medical Condition": "Asthma", "Test Results": "Normal", "count": 2850}, {"Medical Condition": "Cancer", "Test Results": "Abnormal", "count": 2797}, {"Medical Condition": "Cancer", "Test Results": "Inconclusive", "count": 2756}, {"Medical Condition": "Cancer", "Test Results": "Normal", "count": 2747}, {"Medical Condition": "Diabetes", "Test Results": "Abnormal", "count": 2846}, {"Medical Condition": "Diabetes", "Test Results": "Inconclusive", "count": 2768}, {"Medical Condition": "Diabetes", "Test Results": "Normal", "count": 2783}, {"Medical Condition": "Hypertension", "Test Results": "Abnormal", "count": 2725}, {"Medical Condition": "Hypertension", "Test Results": "Inconclusive", "count": 2787}, {"Medical Condition": "Hypertension", "Test Results": "Normal", "count": 2813}, {"Medical Condition": "Obesity", "Test Results": "Abnormal", "count": 2823}, {"Medical Condition": "Obesity", "Test Results": "Inconclusive", "count": 2720}, {"Medical Condition": "Obesity", "Test Results": "Normal", "count": 2755}], "demographics": [{"age_group": "0-18", "patient_count": 728, "avg_billing": 26326.19}, {"age_group": "19-30", "patient_count": 8722, "avg_billing": 25497.33}, {"age_group": "31-45", "patient_count": 11030, "avg_billing": 25649.54}, {"age_group": "46-60", "patient_count": 11172, "avg_billing": 25518.54}, {"age_group": "61-75", "patient_count": 11003, "avg_billing": 25520.01}, {"age_group": "76+", "patient_count": 7394, "avg_billing": 25542.14}], "kpis": {"total_hospitals": 39876, "total_patients": 50049, "total_billing": 1279215962.63, "avg_billing": 25559.271166856484}}}</script>
+<script>
+const data = JSON.parse(document.getElementById('all-data').textContent);
+const fmtMoney = n => '$' + (n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(1)+'M':n.toLocaleString(undefined,{maximumFractionDigits:0}));
+const fmtInt = n => n.toLocaleString();
+
+// ---- tabs ----
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---- BRONZE ----
+const b = data.bronze;
+document.getElementById('b-rows').textContent = fmtInt(b.total_rows);
+document.getElementById('b-cols').textContent = b.total_columns;
+document.getElementById('b-file').textContent = b.source_file;
+document.getElementById('b-ts').textContent = new Date(b.ingestion_timestamp).toLocaleString();
+
+if (b.sample_rows.length){
+  const cols = Object.keys(b.sample_rows[0]);
+  const thead = document.querySelector('#b-sample thead');
+  thead.innerHTML = '<tr>' + cols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+  const tbody = document.querySelector('#b-sample tbody');
+  b.sample_rows.forEach(row=>{
+    tbody.innerHTML += '<tr>' + cols.map(c=>`<td>${row[c]}</td>`).join('') + '</tr>';
+  });
+}
+
+// ---- SILVER ----
+const s = data.silver;
+document.getElementById('s-current').textContent = fmtInt(s.current_rows);
+document.getElementById('s-historical').textContent = fmtInt(s.historical_rows);
+document.getElementById('s-dupes').textContent = fmtInt(s.duplicates_removed);
+document.getElementById('s-negbill').textContent = fmtInt(s.negative_billing_flagged);
+
+const changedBody = document.querySelector('#s-changed tbody');
+s.changed_encounters_sample.forEach(r=>{
+  changedBody.innerHTML += `<tr><td>${r['Name']}</td><td>${r['Hospital']}</td><td class="num">$${Number(r['Billing Amount']).toLocaleString()}</td><td>${r['effective_end_date']}</td></tr>`;
+});
+const newBody = document.querySelector('#s-new tbody');
+s.new_current_versions_sample.forEach(r=>{
+  newBody.innerHTML += `<tr><td>${r['Name']}</td><td>${r['Hospital']}</td><td class="num">$${Number(r['Billing Amount']).toLocaleString()}</td><td>${r['effective_start_date']}</td></tr>`;
+});
+
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#5B7570';
+const palette = ['#3E8E7E','#D98E3E','#C4655B','#8FBFAF','#0E2E2C','#B08752'];
+
+new Chart(document.getElementById('s-donut'), {
+  type:'doughnut',
+  data:{labels:['Current','Historical (expired)'], datasets:[{data:[s.current_rows, s.historical_rows], backgroundColor:['#3E8E7E','#C4655B'], borderWidth:2, borderColor:'#fff'}]},
+  options:{plugins:{legend:{position:'bottom'}}}
+});
+
+// ---- GOLD ----
+const g = data.gold;
+document.getElementById('g-patients').textContent = fmtInt(g.kpis.total_patients);
+document.getElementById('g-hospitals').textContent = fmtInt(g.kpis.total_hospitals);
+document.getElementById('g-billing').textContent = fmtMoney(g.kpis.total_billing);
+document.getElementById('g-avg').textContent = fmtMoney(g.kpis.avg_billing);
+
+const htbody = document.getElementById('g-hospitaltable');
+g.hospital_ranking_top15.slice(0,10).forEach(h=>{
+  htbody.innerHTML += `<tr><td class="rank">${h.rank}</td><td>${h.Hospital}</td><td class="num">${fmtInt(h.patient_count)}</td><td class="num">${fmtMoney(h.total_billing)}</td></tr>`;
+});
+
+new Chart(document.getElementById('g-trend'), {
+  type:'line',
+  data:{labels:g.monthly_trend.map(d=>d.admission_month), datasets:[{data:g.monthly_trend.map(d=>d.admissions), borderColor:'#3E8E7E', backgroundColor:'rgba(62,142,126,0.12)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}]},
+  options:{plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:8}, grid:{display:false}}, y:{grid:{color:'#EEF3F0'}}}}
+});
+
+new Chart(document.getElementById('g-condition'), {
+  type:'doughnut',
+  data:{labels:g.condition.map(d=>d['Medical Condition']), datasets:[{data:g.condition.map(d=>d.patient_count), backgroundColor:palette, borderWidth:2, borderColor:'#fff'}]},
+  options:{plugins:{legend:{position:'bottom', labels:{boxWidth:9,padding:8}}}}
+});
+
+new Chart(document.getElementById('g-admission'), {
+  type:'bar',
+  data:{labels:g.admission_type.map(d=>d['Admission Type']), datasets:[{data:g.admission_type.map(d=>d.avg_billing), backgroundColor:'#D98E3E', borderRadius:4}]},
+  options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:'#EEF3F0'}}, x:{grid:{display:false}}}}
+});
+
+new Chart(document.getElementById('g-age'), {
+  type:'bar',
+  data:{labels:g.demographics.map(d=>d.age_group), datasets:[{data:g.demographics.map(d=>d.patient_count), backgroundColor:'#8FBFAF', borderRadius:4}]},
+  options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:'#EEF3F0'}}, x:{grid:{display:false}}}}
+});
+
+const conditions = [...new Set(g.test_outcomes.map(d=>d['Medical Condition']))];
+const results = ['Normal','Abnormal','Inconclusive'];
+const resultColors = {Normal:'#3E8E7E', Abnormal:'#C4655B', Inconclusive:'#D98E3E'};
+new Chart(document.getElementById('g-tests'), {
+  type:'bar',
+  data:{labels:conditions, datasets:results.map(r=>({label:r, data:conditions.map(c=>(g.test_outcomes.find(d=>d['Medical Condition']===c && d['Test Results']===r)||{}).count||0), backgroundColor:resultColors[r], borderRadius:3}))},
+  options:{plugins:{legend:{position:'bottom', labels:{boxWidth:9,padding:8}}}, scales:{x:{stacked:true, grid:{display:false}}, y:{stacked:true, grid:{color:'#EEF3F0'}}}}
+});
+
+new Chart(document.getElementById('g-insurance'), {
+  type:'bar',
+  data:{labels:g.insurance.map(d=>d['Insurance Provider']), datasets:[{data:g.insurance.map(d=>d.total_billing), backgroundColor:'#0E2E2C', borderRadius:4}]},
+  options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#EEF3F0'}, ticks:{callback:v=>fmtMoney(v)}}, y:{grid:{display:false}}}}
+});
+</script>
+</body>
+</html>
