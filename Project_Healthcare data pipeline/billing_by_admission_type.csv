@@ -1,0 +1,4 @@
+Admission Type,patient_count,avg_billing,total_billing
+Elective,16828,25622.89,431181995.16
+Emergency,16390,25530.21,418440097.13
+Urgent,16784,25524.81,428408410.94
