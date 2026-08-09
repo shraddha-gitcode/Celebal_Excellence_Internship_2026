@@ -1,0 +1,5 @@
+Name,Age,Gender,Blood Type,Medical Condition,Date of Admission,Doctor,Hospital,Insurance Provider,Billing Amount,Room Number,Admission Type,Discharge Date,Medication,Test Results
+Bobby JacksOn,30,Male,B-,Cancer,2024-01-31,Matthew Smith,Sons and Miller,Blue Cross,19500.00,328,Urgent,2024-02-02,Paracetamol,Abnormal
+LesLie TErRy,62,Male,A+,Obesity,2019-08-20,Samantha Davies,Kim Inc,Medicare,34100.50,265,Emergency,2019-08-26,Ibuprofen,Normal
+Sarah Connor,42,Female,O+,Hypertension,2024-06-01,Dr. Marcus Vance,Metro Health,Aetna,22400.00,412,Elective,2024-06-05,Lisinopril,Normal
+David Miller,55,Male,AB-,Asthma,2024-06-01,Dr. Marcus Vance,Metro Health,Cigna,18750.00,414,Emergency,2024-06-04,Albuterol,Inconclusive
