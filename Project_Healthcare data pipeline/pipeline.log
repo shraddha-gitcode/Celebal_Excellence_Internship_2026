@@ -1,0 +1,191 @@
+[2026-08-09 00:09:22] [INFO] [bronze] ======================================================================
+[2026-08-09 00:09:22] [INFO] [bronze] BRONZE LAYER — Ingesting Raw Dataset from: sample_source.csv
+[2026-08-09 00:09:22] [INFO] [bronze] ======================================================================
+[2026-08-09 00:09:22] [INFO] [bronze] Discovered 2 raw source records across 15 columns.
+[2026-08-09 00:09:22] [INFO] [bronze] Bronze Ingestion Complete: 2 rows saved to patient_records_bronze.csv
+[2026-08-09 00:09:22] [INFO] [gold] ======================================================================
+[2026-08-09 00:09:22] [INFO] [gold] GOLD LAYER — Business Aggregations & Insights
+[2026-08-09 00:09:22] [INFO] [gold] ======================================================================
+[2026-08-09 00:09:22] [INFO] [gold] Active encounters used for Gold aggregations: 3
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: patient_count_per_hospital           (    2 rows) -> patient_count_per_hospital.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: hospital_ranking                     (    2 rows) -> hospital_ranking.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: contribution_by_medical_condition    (    2 rows) -> contribution_by_medical_condition.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: billing_by_admission_type            (    3 rows) -> billing_by_admission_type.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: billing_by_insurance_provider        (    3 rows) -> billing_by_insurance_provider.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: monthly_admission_trend              (    3 rows) -> monthly_admission_trend.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: test_outcomes_by_condition           (    3 rows) -> test_outcomes_by_condition.csv
+[2026-08-09 00:09:22] [INFO] [gold]   Wrote Gold Table: demographics_by_age_group            (    3 rows) -> demographics_by_age_group.csv
+[2026-08-09 00:09:22] [INFO] [gold] Dashboard JSON snapshot generated -> gold_data.json
+[2026-08-09 00:09:22] [INFO] [data_quality] Data Quality Report successfully written to: C:\Users\bhushan chaturbhuj\AppData\Local\Temp\pytest-of-bhushan chaturbhuj\pytest-2\test_data_quality_report_expor0\data_quality_report.json
+[2026-08-09 00:09:22] [INFO] [test_logger] Test log event: pipeline started successfully.
+[2026-08-09 00:09:22] [INFO] [silver] Silver Cleaning: Removed 1 exact duplicate rows.
+[2026-08-09 00:09:22] [INFO] [silver] Silver Cleaning: Removed 1 rows with missing critical fields.
+[2026-08-09 00:09:23] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:09:23] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:09:23] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:09:23] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:09:23] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:09:23] [INFO] [silver]   Brand-new encounters inserted : 1
+[2026-08-09 00:09:23] [INFO] [silver]   Changed encounters (new ver) : 1
+[2026-08-09 00:09:23] [INFO] [silver]   Expired historical versions   : 1
+[2026-08-09 00:09:23] [INFO] [silver]   Unchanged encounters          : 0
+[2026-08-09 00:09:48] [INFO] [pipeline] ######################################################################
+[2026-08-09 00:09:48] [INFO] [pipeline] # HEALTHCARE DATA PIPELINE — PRODUCTION-READY MEDALLION EXECUTION
+[2026-08-09 00:09:48] [INFO] [pipeline] ######################################################################
+[2026-08-09 00:09:48] [INFO] [pipeline] Input Discovery: Found primary source dataset 'source_data.csv' (55,500 records).
+[2026-08-09 00:09:48] [INFO] [pipeline] Input Discovery: Found incremental batch dataset 'sample_incremental_batch.csv' in incremental/
+[2026-08-09 00:09:48] [INFO] [bronze] ======================================================================
+[2026-08-09 00:09:48] [INFO] [bronze] BRONZE LAYER — Ingesting Raw Dataset from: source_data.csv
+[2026-08-09 00:09:48] [INFO] [bronze] ======================================================================
+[2026-08-09 00:09:48] [INFO] [bronze] Discovered 55,500 raw source records across 15 columns.
+[2026-08-09 00:09:48] [INFO] [bronze] Bronze Ingestion Complete: 55,500 rows saved to patient_records_bronze.csv
+[2026-08-09 00:09:48] [INFO] [silver] ======================================================================
+[2026-08-09 00:09:48] [INFO] [silver] SILVER LAYER — Data Cleaning, Standardization & SCD Type 2 MERGE
+[2026-08-09 00:09:48] [INFO] [silver] ======================================================================
+[2026-08-09 00:09:49] [INFO] [silver] Silver Cleaning: Removed 534 exact duplicate rows.
+[2026-08-09 00:09:50] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 49,469 initial active records.
+[2026-08-09 00:09:50] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:09:50] [INFO] [silver]   Brand-new encounters inserted : 531
+[2026-08-09 00:09:50] [INFO] [silver]   Changed encounters (new ver) : 250
+[2026-08-09 00:09:50] [INFO] [silver]   Expired historical versions   : 250
+[2026-08-09 00:09:50] [INFO] [silver]   Unchanged encounters          : 4,892
+[2026-08-09 00:09:50] [INFO] [silver] Processing External Incremental Batch: sample_incremental_batch.csv
+[2026-08-09 00:09:50] [INFO] [silver] Silver Cleaning: Removed 0 exact duplicate rows.
+[2026-08-09 00:09:50] [INFO] [data_quality] Data Quality Report successfully written to: C:\Users\bhushan chaturbhuj\Downloads\healthcare_pipeline\reports\data_quality_report.json
+[2026-08-09 00:09:50] [ERROR] [pipeline] FAILURE: Pipeline execution failed with error: name 'datetime' is not defined
+Traceback (most recent call last):
+  File "C:\Users\bhushan chaturbhuj\Downloads\healthcare_pipeline\src\pipeline.py", line 57, in run_pipeline
+    silver_df = process_silver_layer(metrics=metrics, incremental_path=inc_batch)
+  File "C:\Users\bhushan chaturbhuj\Downloads\healthcare_pipeline\src\silver.py", line 209, in process_silver_layer
+    silver_df, _ = scd2_merge(silver_df, inc_clean, load_date=datetime.now().strftime("%Y-%m-%d"))
+                                                              ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'?
+[2026-08-09 00:10:10] [INFO] [bronze] ======================================================================
+[2026-08-09 00:10:10] [INFO] [bronze] BRONZE LAYER — Ingesting Raw Dataset from: sample_source.csv
+[2026-08-09 00:10:10] [INFO] [bronze] ======================================================================
+[2026-08-09 00:10:10] [INFO] [bronze] Discovered 2 raw source records across 15 columns.
+[2026-08-09 00:10:10] [INFO] [bronze] Bronze Ingestion Complete: 2 rows saved to patient_records_bronze.csv
+[2026-08-09 00:10:10] [INFO] [gold] ======================================================================
+[2026-08-09 00:10:10] [INFO] [gold] GOLD LAYER — Business Aggregations & Insights
+[2026-08-09 00:10:10] [INFO] [gold] ======================================================================
+[2026-08-09 00:10:10] [INFO] [gold] Active encounters used for Gold aggregations: 3
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: patient_count_per_hospital           (    2 rows) -> patient_count_per_hospital.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: hospital_ranking                     (    2 rows) -> hospital_ranking.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: contribution_by_medical_condition    (    2 rows) -> contribution_by_medical_condition.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: billing_by_admission_type            (    3 rows) -> billing_by_admission_type.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: billing_by_insurance_provider        (    3 rows) -> billing_by_insurance_provider.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: monthly_admission_trend              (    3 rows) -> monthly_admission_trend.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: test_outcomes_by_condition           (    3 rows) -> test_outcomes_by_condition.csv
+[2026-08-09 00:10:10] [INFO] [gold]   Wrote Gold Table: demographics_by_age_group            (    3 rows) -> demographics_by_age_group.csv
+[2026-08-09 00:10:10] [INFO] [gold] Dashboard JSON snapshot generated -> gold_data.json
+[2026-08-09 00:10:10] [INFO] [data_quality] Data Quality Report successfully written to: C:\Users\bhushan chaturbhuj\AppData\Local\Temp\pytest-of-bhushan chaturbhuj\pytest-3\test_data_quality_report_expor0\data_quality_report.json
+[2026-08-09 00:10:10] [INFO] [test_logger] Test log event: pipeline started successfully.
+[2026-08-09 00:10:10] [INFO] [silver] Silver Cleaning: Removed 1 exact duplicate rows.
+[2026-08-09 00:10:10] [INFO] [silver] Silver Cleaning: Removed 1 rows with missing critical fields.
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:10:10] [INFO] [silver]   Brand-new encounters inserted : 0
+[2026-08-09 00:10:10] [INFO] [silver]   Changed encounters (new ver) : 0
+[2026-08-09 00:10:10] [INFO] [silver]   Expired historical versions   : 0
+[2026-08-09 00:10:10] [INFO] [silver]   Unchanged encounters          : 1
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:10:10] [INFO] [silver]   Brand-new encounters inserted : 0
+[2026-08-09 00:10:10] [INFO] [silver]   Changed encounters (new ver) : 1
+[2026-08-09 00:10:10] [INFO] [silver]   Expired historical versions   : 1
+[2026-08-09 00:10:10] [INFO] [silver]   Unchanged encounters          : 0
+[2026-08-09 00:10:10] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:51] [INFO] [bronze] ======================================================================
+[2026-08-09 00:10:51] [INFO] [bronze] BRONZE LAYER — Ingesting Raw Dataset from: sample_source.csv
+[2026-08-09 00:10:51] [INFO] [bronze] ======================================================================
+[2026-08-09 00:10:51] [INFO] [bronze] Discovered 2 raw source records across 15 columns.
+[2026-08-09 00:10:51] [INFO] [bronze] Bronze Ingestion Complete: 2 rows saved to patient_records_bronze.csv
+[2026-08-09 00:10:51] [INFO] [gold] ======================================================================
+[2026-08-09 00:10:51] [INFO] [gold] GOLD LAYER — Business Aggregations & Insights
+[2026-08-09 00:10:51] [INFO] [gold] ======================================================================
+[2026-08-09 00:10:51] [INFO] [gold] Active encounters used for Gold aggregations: 3
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: patient_count_per_hospital           (    2 rows) -> patient_count_per_hospital.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: hospital_ranking                     (    2 rows) -> hospital_ranking.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: contribution_by_medical_condition    (    2 rows) -> contribution_by_medical_condition.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: billing_by_admission_type            (    3 rows) -> billing_by_admission_type.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: billing_by_insurance_provider        (    3 rows) -> billing_by_insurance_provider.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: monthly_admission_trend              (    3 rows) -> monthly_admission_trend.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: test_outcomes_by_condition           (    3 rows) -> test_outcomes_by_condition.csv
+[2026-08-09 00:10:51] [INFO] [gold]   Wrote Gold Table: demographics_by_age_group            (    3 rows) -> demographics_by_age_group.csv
+[2026-08-09 00:10:51] [INFO] [gold] Dashboard JSON snapshot generated -> gold_data.json
+[2026-08-09 00:10:51] [INFO] [data_quality] Data Quality Report successfully written to: C:\Users\bhushan chaturbhuj\AppData\Local\Temp\pytest-of-bhushan chaturbhuj\pytest-4\test_data_quality_report_expor0\data_quality_report.json
+[2026-08-09 00:10:51] [INFO] [test_logger] Test log event: pipeline started successfully.
+[2026-08-09 00:10:51] [INFO] [silver] Silver Cleaning: Removed 1 exact duplicate rows.
+[2026-08-09 00:10:51] [INFO] [silver] Silver Cleaning: Removed 1 rows with missing critical fields.
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:10:51] [INFO] [silver]   Brand-new encounters inserted : 0
+[2026-08-09 00:10:51] [INFO] [silver]   Changed encounters (new ver) : 0
+[2026-08-09 00:10:51] [INFO] [silver]   Expired historical versions   : 0
+[2026-08-09 00:10:51] [INFO] [silver]   Unchanged encounters          : 1
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:10:51] [INFO] [silver]   Brand-new encounters inserted : 0
+[2026-08-09 00:10:51] [INFO] [silver]   Changed encounters (new ver) : 1
+[2026-08-09 00:10:51] [INFO] [silver]   Expired historical versions   : 1
+[2026-08-09 00:10:51] [INFO] [silver]   Unchanged encounters          : 0
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 1 initial active records.
+[2026-08-09 00:10:51] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:10:51] [INFO] [silver]   Brand-new encounters inserted : 1
+[2026-08-09 00:10:51] [INFO] [silver]   Changed encounters (new ver) : 1
+[2026-08-09 00:10:51] [INFO] [silver]   Expired historical versions   : 1
+[2026-08-09 00:10:51] [INFO] [silver]   Unchanged encounters          : 0
+[2026-08-09 00:11:00] [INFO] [pipeline] ######################################################################
+[2026-08-09 00:11:00] [INFO] [pipeline] # HEALTHCARE DATA PIPELINE — PRODUCTION-READY MEDALLION EXECUTION
+[2026-08-09 00:11:00] [INFO] [pipeline] ######################################################################
+[2026-08-09 00:11:00] [INFO] [pipeline] Input Discovery: Found primary source dataset 'source_data.csv' (55,500 records).
+[2026-08-09 00:11:00] [INFO] [pipeline] Input Discovery: Found incremental batch dataset 'sample_incremental_batch.csv' in incremental/
+[2026-08-09 00:11:00] [INFO] [bronze] ======================================================================
+[2026-08-09 00:11:00] [INFO] [bronze] BRONZE LAYER — Ingesting Raw Dataset from: source_data.csv
+[2026-08-09 00:11:00] [INFO] [bronze] ======================================================================
+[2026-08-09 00:11:01] [INFO] [bronze] Discovered 55,500 raw source records across 15 columns.
+[2026-08-09 00:11:01] [INFO] [bronze] Bronze Ingestion Complete: 55,500 rows saved to patient_records_bronze.csv
+[2026-08-09 00:11:01] [INFO] [silver] ======================================================================
+[2026-08-09 00:11:01] [INFO] [silver] SILVER LAYER — Data Cleaning, Standardization & SCD Type 2 MERGE
+[2026-08-09 00:11:01] [INFO] [silver] ======================================================================
+[2026-08-09 00:11:02] [INFO] [silver] Silver Cleaning: Removed 534 exact duplicate rows.
+[2026-08-09 00:11:02] [INFO] [silver] SCD2 Initial Load (2024-06-01): Inserted 49,469 initial active records.
+[2026-08-09 00:11:03] [INFO] [silver] SCD2 MERGE Execution (2024-06-02):
+[2026-08-09 00:11:03] [INFO] [silver]   Brand-new encounters inserted : 531
+[2026-08-09 00:11:03] [INFO] [silver]   Changed encounters (new ver) : 250
+[2026-08-09 00:11:03] [INFO] [silver]   Expired historical versions   : 250
+[2026-08-09 00:11:03] [INFO] [silver]   Unchanged encounters          : 4,892
+[2026-08-09 00:11:03] [INFO] [silver] Processing External Incremental Batch: sample_incremental_batch.csv
+[2026-08-09 00:11:03] [INFO] [silver] Silver Cleaning: Removed 0 exact duplicate rows.
+[2026-08-09 00:11:03] [INFO] [silver] SCD2 MERGE Execution (2026-08-09):
+[2026-08-09 00:11:03] [INFO] [silver]   Brand-new encounters inserted : 2
+[2026-08-09 00:11:03] [INFO] [silver]   Changed encounters (new ver) : 2
+[2026-08-09 00:11:03] [INFO] [silver]   Expired historical versions   : 2
+[2026-08-09 00:11:03] [INFO] [silver]   Unchanged encounters          : 0
+[2026-08-09 00:11:04] [INFO] [silver] Silver Layer Execution Summary:
+[2026-08-09 00:11:04] [INFO] [silver]   Total Silver Records (Current + Expired) : 50,254
+[2026-08-09 00:11:04] [INFO] [silver]   Active Current Records (is_current=True)  : 50,002
+[2026-08-09 00:11:04] [INFO] [silver]   Expired Historical Records (SCD2 history): 252
+[2026-08-09 00:11:04] [INFO] [silver]   Saved to                                 : patient_records_silver.csv
+[2026-08-09 00:11:04] [INFO] [gold] ======================================================================
+[2026-08-09 00:11:04] [INFO] [gold] GOLD LAYER — Business Aggregations & Insights
+[2026-08-09 00:11:04] [INFO] [gold] ======================================================================
+[2026-08-09 00:11:04] [INFO] [gold] Active encounters used for Gold aggregations: 50,002
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: patient_count_per_hospital           (39877 rows) -> patient_count_per_hospital.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: hospital_ranking                     (39877 rows) -> hospital_ranking.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: contribution_by_medical_condition    (    6 rows) -> contribution_by_medical_condition.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: billing_by_admission_type            (    3 rows) -> billing_by_admission_type.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: billing_by_insurance_provider        (    5 rows) -> billing_by_insurance_provider.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: monthly_admission_trend              (   62 rows) -> monthly_admission_trend.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: test_outcomes_by_condition           (   18 rows) -> test_outcomes_by_condition.csv
+[2026-08-09 00:11:04] [INFO] [gold]   Wrote Gold Table: demographics_by_age_group            (    6 rows) -> demographics_by_age_group.csv
+[2026-08-09 00:11:04] [INFO] [gold] Dashboard JSON snapshot generated -> gold_data.json
+[2026-08-09 00:11:04] [INFO] [gold] Synchronized dashboard HTML embedded JSON -> gold_dashboard.html
+[2026-08-09 00:11:04] [INFO] [data_quality] Data Quality Report successfully written to: C:\Users\bhushan chaturbhuj\Downloads\healthcare_pipeline\reports\data_quality_report.json
+[2026-08-09 00:11:04] [INFO] [pipeline] SUCCESS: Healthcare Data Pipeline completed in 4.24 seconds.
+[2026-08-09 00:11:04] [INFO] [pipeline]   Data Quality Audit Status : PASS
+[2026-08-09 00:11:04] [INFO] [pipeline]   Data Quality Report Saved : data_quality_report.json
+[2026-08-09 00:11:04] [INFO] [pipeline]   Pipeline Log File Saved   : logs/pipeline.log
+

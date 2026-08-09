@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-08-08T18:41:04.941476+00:00",
+  "source_row_count": 55500,
+  "bronze_row_count": 55500,
+  "duplicate_count": 534,
+  "null_count": 0,
+  "invalid_date_count": 0,
+  "invalid_billing_count": 108,
+  "silver_total_count": 50254,
+  "silver_current_count": 50002,
+  "silver_historical_count": 252,
+  "scd2_validation": "PASS",
+  "gold_tables_count": 8,
+  "gold_validation": "PASS",
+  "overall_status": "PASS"
+}

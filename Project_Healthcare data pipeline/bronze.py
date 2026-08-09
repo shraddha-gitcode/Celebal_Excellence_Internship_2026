@@ -1,40 +1,56 @@
-"""Databricks / PySpark Production Target — Bronze Layer Ingestion
+"""BRONZE LAYER — Raw Data Ingestion
 
-Reads raw source CSV using Spark DataFrame API, appends ingestion metadata,
-and writes to Delta Lake storage (`healthcare_bronze`).
+Preserves raw patient records as received from source systems without mutating
+business values. Adds standard metadata columns for lineage and auditability.
 """
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, input_file_name
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Optional
+import pandas as pd
 
-def run_bronze_pyspark(source_path: str = "/mnt/healthcare/source_data.csv",
-                      delta_path: str = "/mnt/delta/healthcare_bronze",
-                      table_name: str = "healthcare_bronze"):
-    """Ingests raw CSV data into Delta Lake Bronze table without mutating business columns."""
-    spark = SparkSession.builder \
-        .appName("HealthcarePipeline-Bronze") \
-        .getOrCreate()
+from src.config import BRONZE_DATA_PATH, SOURCE_DATA_PATH
+from src.logger import get_logger
+from src.utils import validate_bronze_data
 
-    # Read raw dataset with string schema enforcement
-    raw_df = spark.read.format("csv") \
-        .option("header", "true") \
-        .option("inferSchema", "false") \
-        .load(source_path)
+logger = get_logger("bronze")
 
-    # Append ingestion metadata columns
-    bronze_df = raw_df \
-        .withColumn("_ingestion_timestamp", current_timestamp()) \
-        .withColumn("_source_file", input_file_name())
 
-    # Write as Delta table (Append mode for batch ingestion)
-    bronze_df.write.format("delta") \
-        .mode("append") \
-        .option("mergeSchema", "true") \
-        .save(delta_path)
+def ingest_to_bronze(
+    source_path: Optional[Path] = None,
+    output_path: Optional[Path] = None
+) -> pd.DataFrame:
+    """Reads raw CSV dataset as strings, appends metadata, and saves to Bronze directory."""
+    src_file = source_path or SOURCE_DATA_PATH
+    out_file = output_path or BRONZE_DATA_PATH
 
-    # Save to catalog/metastore if configured
-    spark.sql(f"CREATE TABLE IF NOT EXISTS {table_name} USING DELTA LOCATION '{delta_path}'")
+    logger.info("=" * 70)
+    logger.info(f"BRONZE LAYER — Ingesting Raw Dataset from: {src_file.name}")
+    logger.info("=" * 70)
 
-    print(f"Successfully ingested {bronze_df.count()} rows into Bronze table '{table_name}'.")
+    if not src_file.exists():
+        logger.error(f"Source file not found: {src_file}")
+        raise FileNotFoundError(f"Source file not found at: {src_file}")
+
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Read raw data as string to prevent silent type mutation
+    df = pd.read_csv(src_file, dtype=str)
+    logger.info(f"Discovered {len(df):,} raw source records across {len(df.columns)} columns.")
+
+    # Append ingestion metadata
+    df["_ingestion_timestamp"] = datetime.now(timezone.utc).isoformat()
+    df["_source_file"] = src_file.name
+    df["_bronze_row_id"] = range(1, len(df) + 1)
+
+    # Data Quality Validation
+    validate_bronze_data(df)
+
+    # Save Bronze dataset
+    df.to_csv(out_file, index=False)
+
+    logger.info(f"Bronze Ingestion Complete: {len(df):,} rows saved to {out_file.name}")
+    return df
+
 
 if __name__ == "__main__":
-    run_bronze_pyspark()
+    ingest_to_bronze()
